@@ -35,11 +35,17 @@ def version():
 
 
 @app.route('/people')
-def people():
+def get_people():
     country = request.args.get('country')
     if country is not None:
         return jsonify([p for p in PEOPLE if p["country"] == country])
     return jsonify(PEOPLE)
+
+
+@app.route('/people', methods=['POST'])
+def post_people():
+    print(request.get_json())
+    return "Its works"
 
 
 @app.route('/people/<id>')
