@@ -1,81 +1,59 @@
+import json
 from flask import Flask, Response, jsonify, request
 
 app = Flask(__name__)
-PEOPLE = [
-    {
-        'id': 0,
-        'name': "Steve",
-        'age': 20,
-        'country': 'US'
-    },
-    {
-        'id': 1,
-        'name': "Jack",
-        'age': 11,
-        'country': 'Spain'
-    },
-    {
-        'id': 2,
-        'name': "John",
-        'age': 30,
-        'country': 'Poland'
-    },
-    {
-        'id': 3,
-        'name': "Selena",
-        'age': 21,
-        'country': 'US'
-    }
-]
+
+with open('data.json', 'r') as fh:
+    data = json.loads(fh.read())['people']
 
 
-@app.route('/version')
+@app.route("/version")
 def version():
-    return '1.0'
+    return "1.0"
 
 
-@app.route('/people')
+@app.route("/people")
 def get_people():
-    country = request.args.get('country')
+    country = request.args.get("country")
     if country is not None:
-        return jsonify([p for p in PEOPLE if p["country"] == country])
-    return jsonify(PEOPLE)
+        return jsonify([p for p in data if p["country"] == country])
+    return jsonify(data)
 
 
-@app.route('/people', methods=['POST'])
+@app.route("/people", methods=["POST"])
 def post_people():
     person = request.get_json()  # возвращает в джсон тело запроса , котоырй передали
-    person_id = len(PEOPLE)
+    person_id = len(data)
 
-    PEOPLE.append({'id': person_id, **person})
+    data.append({"id": person_id, **person})
 
     return jsonify({"id": person_id}), 201
 
 
-@app.route('/people/<id>')
-def get_person(id):
+@app.route("/people/<int:id>")
+def get_person(id: int):
     try:
-        return jsonify(PEOPLE[int(id)])
+        return jsonify(data[id])
     except IndexError:
-        return Response('Not Found', status=404)
+        return Response("Not Found", status=404)
 
 
-@app.route('/people/<id>', methods=["DELETE"])
-def delete_person(id):
+@app.route("/people/<int:id>", methods=["DELETE"])
+def delete_person(id: int):
     try:
-        PEOPLE[int(id)] = None
+        data[id] = None
         return Response(status=204)
     except IndexError:
-        return Response('Not Found', status=204)
+        return Response("Not Found", status=204)
 
 
-@app.route('/people/<id>', methods=['PATCH'])
-def update_peron(id):
+@app.route("/people/<int:id>", methods=["PATCH"])
+def update_person(id: int):
     try:
-        PEOPLE[int(id)].update(request.get_json())
+        data[id].update(request.get_json())
         return Response(status=204)
     except IndexError:
-        return Response('Not Found', status=404)
+        return Response("Not Found", status=404)
 
 
 if __name__ == "__main__":
