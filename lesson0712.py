@@ -44,14 +44,36 @@ def get_people():
 
 @app.route('/people', methods=['POST'])
 def post_people():
-    print(request.get_json())
-    return "Its works"
+    person = request.get_json()  # возвращает в джсон тело запроса , котоырй передали
+    person_id = len(PEOPLE)
+
+    PEOPLE.append({'id': person_id, **person})
+
+    return jsonify({"id": person_id}), 201
 
 
 @app.route('/people/<id>')
 def get_person(id):
     try:
         return jsonify(PEOPLE[int(id)])
+    except IndexError:
+        return Response('Not Found', status=404)
+
+
+@app.route('/people/<id>', methods=["DELETE"])
+def delete_person(id):
+    try:
+        PEOPLE[int(id)] = None
+        return Response(status=204)
+    except IndexError:
+        return Response('Not Found', status=204)
+
+
+@app.route('/people/<id>', methods=['PATCH'])
+def update_peron(id):
+    try:
+        PEOPLE[int(id)].update(request.get_json())
+        return Response(status=204)
     except IndexError:
         return Response('Not Found', status=404)
 
